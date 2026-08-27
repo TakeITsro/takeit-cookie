@@ -17,6 +17,11 @@
             "homepage": "https://takeitsro.sk"
         }
     ],
+    "support": {
+        "issues": "https://github.com/TakeITsro/takeit-cookie/issues",
+        "source": "https://github.com/TakeITsro/takeit-cookie",
+        "docs": "https://github.com/TakeITsro/takeit-cookie/blob/main/README.md"
+    },
     "require": {
         "php": ">=8.2",
         "craftcms/cms": "^5.0.0"
@@ -31,7 +36,8 @@
         "handle": "takeit-cookie",
         "developer": "TakeIT s.r.o.",
         "developerUrl": "https://takeitsro.sk",
-        "class": "takeit\\takeitcookie\\Plugin"
+        "class": "takeit\\takeitcookie\\Plugin",
+        "documentationUrl": "https://github.com/TakeITsro/takeit-cookie/blob/main/README.md"
     },
     "config": {
         "sort-packages": true,

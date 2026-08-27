@@ -362,6 +362,11 @@ class Settings extends Model
                 $this->addError($attribute, Craft::t('takeit-cookie', 'Row {row}: the script is empty.', ['row' => $index + 1]));
             }
 
+            // The snippet is held in a <template> until consent, so it must not close one.
+            if (stripos($code, '</template') !== false) {
+                $this->addError($attribute, Craft::t('takeit-cookie', 'Row {row}: the snippet cannot contain a closing template tag.', ['row' => $index + 1]));
+            }
+
             if (!isset($catalog[$category]) || $catalog[$category]['required'] || $catalog[$category]['parent'] !== null) {
                 $this->addError($attribute, Craft::t('takeit-cookie', 'Row {row}: pick a consent category that visitors can decline.', ['row' => $index + 1]));
                 $category = '';

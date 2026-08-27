@@ -146,6 +146,12 @@
     </div>
 
     <div id="analytics" class="flex-fields hidden">
+        {% if not analyticsCategoryEnabled and (settings.gaMeasurementId or settings.gtmContainerId) %}
+            <blockquote class="note warning">
+                <p>{{ "The analytics category is switched off, so visitors are never asked about it and nothing here will ever load. Turn it on under Categories."|t('takeit-cookie') }}</p>
+            </blockquote>
+        {% endif %}
+
         {{ forms.textField({
             label: "GA4 measurement ID"|t('takeit-cookie'),
             instructions: "Leave empty to load nothing. Google Analytics is only loaded once the visitor accepts the analytics category."|t('takeit-cookie'),
@@ -168,6 +174,12 @@
     </div>
 
     <div id="marketing" class="flex-fields hidden">
+        {% if not marketingCategoryEnabled and settings.metaPixelId %}
+            <blockquote class="note warning">
+                <p>{{ "The marketing category is switched off, so visitors are never asked about it and the pixel will never load. Turn it on under Categories."|t('takeit-cookie') }}</p>
+            </blockquote>
+        {% endif %}
+
         {{ forms.textField({
             label: "Meta Pixel ID"|t('takeit-cookie'),
             instructions: "Leave empty to load nothing. The pixel is only loaded once the visitor accepts the marketing category."|t('takeit-cookie'),
@@ -180,6 +192,12 @@
     </div>
 
     <div id="scripts" class="hidden">
+        {% if orphanedScriptNames|length %}
+            <blockquote class="note warning">
+                <p>{{ "These scripts are switched on but tied to a category that is not being asked about, so they will never run: {names}"|t('takeit-cookie', {names: orphanedScriptNames|join(', ')}) }}</p>
+            </blockquote>
+        {% endif %}
+
         {% if scriptCategoryOptions|length %}
             {{ forms.editableTableField({
                 label: "Custom scripts"|t('takeit-cookie'),

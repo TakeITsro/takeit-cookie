@@ -41,6 +41,9 @@ class SettingsController extends Controller
             'categoryDescriptions' => $this->categoryDescriptions(),
             'positionOptions' => $this->selectOptions(Settings::positionOptions()),
             'scriptCategoryOptions' => $this->selectOptions($settings->scriptCategoryOptions()),
+            'analyticsCategoryEnabled' => $settings->isCategoryEnabled('analytics'),
+            'marketingCategoryEnabled' => $settings->isCategoryEnabled('marketing'),
+            'orphanedScriptNames' => Plugin::getInstance()->getRenderService()->orphanedScriptNames($settings),
         ]);
     }
 
