@@ -42,9 +42,6 @@ composer require takeit/takeit-cookie:^1.0.0
 php craft plugin/install takeit-cookie
 ```
 
-The repository is private, so any server installing it needs a GitHub token in its Composer
-auth config.
-
 ### Working on the plugin locally
 
 To edit the plugin and see changes immediately, use a path repository instead:

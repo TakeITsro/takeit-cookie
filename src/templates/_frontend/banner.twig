@@ -1,0 +1,68 @@
+<div class="cookie flex_column align_start">
+    <div class="cookie_wrapper flex_column align_start">
+        {% if settings.companyName %}
+            <div class="cookie_title">{{ settings.companyName }}</div>
+        {% endif %}
+
+        <p class="cookie_text">{{ "We use cookies to provide the various features of the services offered on this website, to analyse access to them, and to use the results to optimise them. We also use cookies to enable targeted advertising. For this purpose, data is also passed on to affiliated companies and our partners. If you only want to consent to strictly necessary cookies, you can decline further cookies here."|t('takeit-cookie') }}{% if policyUrl %} <a href="{{ policyUrl }}">{{ "Cookie policy"|t('takeit-cookie') }}</a>{% endif %}</p>
+
+        <div class="cookie_container">
+            <div class="cookie_wrapper flex_column align_start">
+                {% for item in items %}
+                    <div class="cookie_wrapper_item">
+                        <div class="cookie_wrapper_line flex align_center">
+                            <div class="column flex_column align_start">
+                                <span class="cookie_subtitle">{{ item.label }}</span>
+                                {% if item.description %}
+                                    <p class="cookie_text">{{ item.description }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="cookie_checkbox{% if item.required %} active disabled{% endif %}"
+                                 id="{{ item.handle }}"
+                                 data-cookie="{{ item.handle }}">
+                                <span></span>
+                            </div>
+                        </div>
+
+                        {% if item.children|length %}
+                            <div class="cookie_wrapper_sub flex align_center">
+                                {% for child in item.children %}
+                                    <div class="cookie_wrapper_sub_item flex_column align_center">
+                                        <div class="cookie_checkbox"
+                                             id="{{ child.handle }}"
+                                             data-cookie="{{ child.handle }}">
+                                            <span></span>
+                                        </div>
+                                        <p class="cookie_text">{{ child.label }}</p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="cookie_bottom flex align_center space_between">
+        <div class="btn white square cookie_more"><span>{{ "Details"|t('takeit-cookie') }}</span></div>
+        <div class="btn white square cookie_less"><span>{{ "Close"|t('takeit-cookie') }}</span></div>
+        <div class="btn white square cookie_deny"><span>{{ "Decline all"|t('takeit-cookie') }}</span></div>
+        <div class="btn white square green cookie_save"><span>{{ "Save"|t('takeit-cookie') }}</span></div>
+        <div class="btn red square green cookie_accept" data-text="{{ "Accept all"|t('takeit-cookie') }}"><span>{{ "Accept all"|t('takeit-cookie') }}</span></div>
+    </div>
+</div>
+
+{% if settings.badgeEnabled %}
+    <div class="cookie_badge">{{ settings.badgeLabel }}</div>
+{% endif %}
+
+{% for script in bodyScripts %}
+    <template data-cc-category="{{ script.category }}" data-cc-position="{{ script.position }}">{{ script.code|raw }}</template>
+{% endfor %}
+
+<script src="{{ scriptUrl }}" defer></script>
+
+{% if bodyScripts|length %}
+    <script>window.TakeitCookieGate.scan();</script>
+{% endif %}

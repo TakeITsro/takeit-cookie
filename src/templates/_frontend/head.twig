@@ -1,0 +1,336 @@
+<script>
+window.TakeitCookie = (function (cfg) {
+    var listeners = [];
+    var stored = read();
+
+    function read() {
+        var name = cfg.cookieName.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&');
+        var match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+
+        if (!match) {
+            return null;
+        }
+
+        var value;
+
+        try {
+            value = JSON.parse(decodeURIComponent(match[1]));
+        } catch (e) {
+            return null;
+        }
+
+        // Anything from an older consent version counts as no answer at all.
+        if (!value || typeof value !== 'object' || value.v !== cfg.version || !value.c || typeof value.c !== 'object') {
+            return null;
+        }
+
+        return value;
+    }
+
+    function write(value) {
+        var parts = [
+            cfg.cookieName + '=' + encodeURIComponent(JSON.stringify(value)),
+            'path=/',
+            'max-age=' + (cfg.lifetimeDays * 86400),
+            'SameSite=Lax'
+        ];
+
+        if (location.protocol === 'https:') {
+            parts.push('Secure');
+        }
+
+        document.cookie = parts.join('; ');
+    }
+
+    function get() {
+        var values = {};
+
+        for (var i = 0; i < cfg.categories.length; i++) {
+            var handle = cfg.categories[i];
+
+            if (cfg.required.indexOf(handle) !== -1) {
+                values[handle] = 1;
+            } else {
+                values[handle] = stored && stored.c[handle] ? 1 : 0;
+            }
+        }
+
+        return values;
+    }
+
+    function has(handle) {
+        return get()[handle] === 1;
+    }
+
+    function isDecided() {
+        return stored !== null;
+    }
+
+    function save(values) {
+        var previous = get();
+        var next = {};
+        var i;
+
+        for (i = 0; i < cfg.categories.length; i++) {
+            var handle = cfg.categories[i];
+            next[handle] = (cfg.required.indexOf(handle) !== -1 || values[handle]) ? 1 : 0;
+        }
+
+        // A sub-category can never outrank the category it sits under.
+        for (var parent in cfg.children) {
+            if (!Object.prototype.hasOwnProperty.call(cfg.children, parent) || next[parent]) {
+                continue;
+            }
+
+            for (i = 0; i < cfg.children[parent].length; i++) {
+                next[cfg.children[parent][i]] = 0;
+            }
+        }
+
+        stored = {v: cfg.version, ts: Math.floor(Date.now() / 1000), c: next};
+        write(stored);
+
+        var revoked = false;
+
+        for (var key in next) {
+            if (Object.prototype.hasOwnProperty.call(next, key) && previous[key] === 1 && next[key] === 0) {
+                revoked = true;
+                break;
+            }
+        }
+
+        var result = {values: next, revoked: revoked};
+
+        for (i = 0; i < listeners.length; i++) {
+            listeners[i](result);
+        }
+
+        return result;
+    }
+
+    function onChange(callback) {
+        listeners.push(callback);
+    }
+
+    return {
+        config: cfg,
+        get: get,
+        has: has,
+        isDecided: isDecided,
+        save: save,
+        onChange: onChange
+    };
+})({{ configJson|raw }});
+</script>
+
+<script>
+/**
+ * Activates consent-gated snippets. Each one sits in an inert <template> until its category
+ * is granted, at which point its nodes are moved into the page — scripts recreated so the
+ * browser actually runs them.
+ */
+window.TakeitCookieGate = (function (api) {
+    function revive(node) {
+        if (node.nodeName !== 'SCRIPT') {
+            return node.cloneNode(true);
+        }
+
+        var script = document.createElement('script');
+
+        for (var i = 0; i < node.attributes.length; i++) {
+            script.setAttribute(node.attributes[i].name, node.attributes[i].value);
+        }
+
+        // Dynamically created scripts default to async, which parser-inserted ones do not.
+        if (!node.hasAttribute('async') && !node.hasAttribute('defer')) {
+            script.async = false;
+        }
+
+        script.text = node.textContent;
+
+        return script;
+    }
+
+    function activate(template) {
+        if (template.getAttribute('data-cc-active') === '1') {
+            return;
+        }
+
+        var position = template.getAttribute('data-cc-position') || 'bodyEnd';
+        var target = position === 'head' ? document.head : document.body;
+
+        if (!target || !template.content) {
+            return;
+        }
+
+        template.setAttribute('data-cc-active', '1');
+
+        var nodes = template.content.childNodes;
+        var fragment = document.createDocumentFragment();
+
+        for (var i = 0; i < nodes.length; i++) {
+            fragment.appendChild(revive(nodes[i]));
+        }
+
+        if (position === 'bodyStart' && target.firstChild) {
+            target.insertBefore(fragment, target.firstChild);
+        } else {
+            target.appendChild(fragment);
+        }
+    }
+
+    function scan() {
+        if (!api) {
+            return;
+        }
+
+        var templates = document.querySelectorAll('template[data-cc-category]');
+
+        for (var i = 0; i < templates.length; i++) {
+            if (api.has(templates[i].getAttribute('data-cc-category'))) {
+                activate(templates[i]);
+            }
+        }
+    }
+
+    if (api) {
+        api.onChange(scan);
+    }
+
+    return {scan: scan};
+})(window.TakeitCookie);
+</script>
+
+{% if analyticsJson %}
+<script>
+(function (api, cfg) {
+    if (!api) {
+        return;
+    }
+
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+        window.dataLayer.push(arguments);
+    }
+
+    if (!window.gtag) {
+        window.gtag = gtag;
+    }
+
+    /**
+     * Google Consent Mode v2 state. A signal the banner does not ask about separately
+     * follows the analytics category itself.
+     */
+    function signalState(values) {
+        var master = values[cfg.category] === 1;
+        var state = {};
+
+        for (var i = 0; i < cfg.signals.length; i++) {
+            var signal = cfg.signals[i];
+            var granted = typeof values[signal] === 'undefined' ? master : values[signal] === 1;
+            state[signal] = granted ? 'granted' : 'denied';
+        }
+
+        return state;
+    }
+
+    function inject(src) {
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = src;
+
+        var first = document.getElementsByTagName('script')[0];
+        first.parentNode.insertBefore(script, first);
+    }
+
+    var loaded = false;
+
+    function load() {
+        // Hard block: nothing is requested from Google until analytics is granted.
+        if (loaded || !api.has(cfg.category)) {
+            return;
+        }
+
+        loaded = true;
+
+        gtag('js', new Date());
+
+        if (cfg.measurementId) {
+            inject('https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(cfg.measurementId));
+            gtag('config', cfg.measurementId);
+        }
+
+        if (cfg.containerId) {
+            window.dataLayer.push({'gtm.start': new Date().getTime(), event: 'gtm.js'});
+            inject('https://www.googletagmanager.com/gtm.js?id=' + encodeURIComponent(cfg.containerId));
+        }
+    }
+
+    gtag('consent', 'default', signalState(api.get()));
+
+    api.onChange(function (result) {
+        gtag('consent', 'update', signalState(result.values));
+        load();
+    });
+
+    load();
+})(window.TakeitCookie, {{ analyticsJson|raw }});
+</script>
+{% endif %}
+
+{% if pixelJson %}
+<script>
+(function (api, cfg) {
+    if (!api) {
+        return;
+    }
+
+    var loaded = false;
+
+    function load() {
+        // Hard block: fbevents.js is not requested until marketing is granted.
+        if (loaded || !api.has(cfg.category)) {
+            return;
+        }
+
+        loaded = true;
+
+        !function (f, b, e, v, n, t, s) {
+            if (f.fbq) return;
+            n = f.fbq = function () {
+                n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+            };
+            if (!f._fbq) f._fbq = n;
+            n.push = n;
+            n.loaded = !0;
+            n.version = '2.0';
+            n.queue = [];
+            t = b.createElement(e);
+            t.async = !0;
+            t.src = v;
+            s = b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t, s);
+        }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+
+        fbq('consent', 'grant');
+        fbq('init', cfg.pixelId);
+        fbq('track', 'PageView');
+    }
+
+    api.onChange(function () {
+        load();
+    });
+
+    load();
+})(window.TakeitCookie, {{ pixelJson|raw }});
+</script>
+{% endif %}
+
+{% for script in headScripts %}
+    <template data-cc-category="{{ script.category }}" data-cc-position="{{ script.position }}">{{ script.code|raw }}</template>
+{% endfor %}
+
+{% if headScripts|length %}
+    <script>window.TakeitCookieGate.scan();</script>
+{% endif %}
