@@ -1,0 +1,229 @@
+{% extends "_layouts/cp.twig" %}
+{% import "_includes/forms.twig" as forms %}
+
+{% set title = "Cookies"|t('takeit-cookie') %}
+{% set fullPageForm = true %}
+
+{% set tabs = {
+    general: {label: "General"|t('takeit-cookie'), url: '#general'},
+    categories: {label: "Categories"|t('takeit-cookie'), url: '#categories'},
+    analytics: {label: "Analytics"|t('takeit-cookie'), url: '#analytics'},
+    marketing: {label: "Marketing"|t('takeit-cookie'), url: '#marketing'},
+    scripts: {label: "Scripts"|t('takeit-cookie'), url: '#scripts'},
+} %}
+
+{% block content %}
+    {{ actionInput('takeit-cookie/settings/save') }}
+    {{ redirectInput('takeit-cookie') }}
+
+    <div id="general" class="flex-fields">
+        {{ forms.lightswitchField({
+            label: "Enable the cookie banner"|t('takeit-cookie'),
+            instructions: "When off, the banner is hidden and no consent-gated script is loaded."|t('takeit-cookie'),
+            id: 'enabled',
+            name: 'enabled',
+            on: settings.enabled,
+            errors: settings.getErrors('enabled'),
+        }) }}
+
+        {{ forms.textField({
+            label: "Company name"|t('takeit-cookie'),
+            instructions: "Shown as the banner heading."|t('takeit-cookie'),
+            id: 'companyName',
+            name: 'companyName',
+            value: settings.companyName,
+            errors: settings.getErrors('companyName'),
+        }) }}
+
+        {{ forms.textField({
+            label: "Cookie policy URL"|t('takeit-cookie'),
+            instructions: "Linked from the banner text. Site-relative (`/cookie-policy`) or absolute."|t('takeit-cookie'),
+            id: 'policyUrl',
+            name: 'policyUrl',
+            value: settings.policyUrl,
+            placeholder: '/cookie-policy',
+            errors: settings.getErrors('policyUrl'),
+        }) }}
+
+        {{ forms.textField({
+            label: "Consent cookie name"|t('takeit-cookie'),
+            instructions: "Name of the cookie the visitor's choice is stored in."|t('takeit-cookie'),
+            id: 'cookieName',
+            name: 'cookieName',
+            value: settings.cookieName,
+            required: true,
+            errors: settings.getErrors('cookieName'),
+        }) }}
+
+        {{ forms.textField({
+            label: "Consent lifetime (days)"|t('takeit-cookie'),
+            instructions: "How long a visitor's choice is remembered before they are asked again."|t('takeit-cookie'),
+            id: 'lifetimeDays',
+            name: 'lifetimeDays',
+            value: settings.lifetimeDays,
+            type: 'number',
+            size: 6,
+            min: 1,
+            max: 3650,
+            step: 1,
+            errors: settings.getErrors('lifetimeDays'),
+        }) }}
+
+        {{ forms.textField({
+            label: "Consent version"|t('takeit-cookie'),
+            instructions: "Increase this after changing which categories you ask about — every visitor is then asked again."|t('takeit-cookie'),
+            id: 'consentVersion',
+            name: 'consentVersion',
+            value: settings.consentVersion,
+            type: 'number',
+            size: 6,
+            min: 1,
+            step: 1,
+            errors: settings.getErrors('consentVersion'),
+        }) }}
+
+        {{ forms.textField({
+            label: "Reveal delay (seconds)"|t('takeit-cookie'),
+            instructions: "How long after page load the banner appears. 0 shows it immediately."|t('takeit-cookie'),
+            id: 'revealDelay',
+            name: 'revealDelay',
+            value: settings.revealDelay,
+            type: 'number',
+            size: 6,
+            min: 0,
+            max: 60,
+            step: 1,
+            errors: settings.getErrors('revealDelay'),
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: "Show the re-open badge"|t('takeit-cookie'),
+            instructions: "A small permanent handle that lets visitors change their choice."|t('takeit-cookie'),
+            id: 'badgeEnabled',
+            name: 'badgeEnabled',
+            on: settings.badgeEnabled,
+            errors: settings.getErrors('badgeEnabled'),
+        }) }}
+
+        {{ forms.textField({
+            label: "Badge label"|t('takeit-cookie'),
+            id: 'badgeLabel',
+            name: 'badgeLabel',
+            value: settings.badgeLabel,
+            errors: settings.getErrors('badgeLabel'),
+        }) }}
+    </div>
+
+    <div id="categories" class="flex-fields hidden">
+        <div class="field">
+            <div class="instructions">
+                <p>{{ "Pick which consent categories the banner asks about. Anything switched off here is not shown and not stored."|t('takeit-cookie') }}</p>
+            </div>
+        </div>
+
+        {% for handle, definition in catalog %}
+            {% set isChild = definition.parent is not null %}
+            <div{% if isChild %} style="padding-left: 24px;"{% endif %}>
+                {{ forms.lightswitchField({
+                    label: categoryLabels[handle] ?? handle,
+                    instructions: categoryDescriptions[handle] ?: null,
+                    id: 'category-' ~ handle,
+                    name: 'enabledCategories[' ~ handle ~ ']',
+                    on: definition.required ? true : (settings.enabledCategories[handle] ?? false),
+                    disabled: definition.required,
+                    warning: definition.required ? "Always on — the site cannot work without these."|t('takeit-cookie') : null,
+                }) }}
+            </div>
+        {% endfor %}
+
+        {% if settings.getErrors('enabledCategories')|length %}
+            <ul class="errors">
+                {% for error in settings.getErrors('enabledCategories') %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    <div id="analytics" class="flex-fields hidden">
+        {{ forms.textField({
+            label: "GA4 measurement ID"|t('takeit-cookie'),
+            instructions: "Leave empty to load nothing. Google Analytics is only loaded once the visitor accepts the analytics category."|t('takeit-cookie'),
+            id: 'gaMeasurementId',
+            name: 'gaMeasurementId',
+            value: settings.gaMeasurementId,
+            placeholder: 'G-XXXXXXXXXX',
+            errors: settings.getErrors('gaMeasurementId'),
+        }) }}
+
+        {{ forms.textField({
+            label: "GTM container ID"|t('takeit-cookie'),
+            instructions: "Optional. Loaded under the same analytics consent as GA4."|t('takeit-cookie'),
+            id: 'gtmContainerId',
+            name: 'gtmContainerId',
+            value: settings.gtmContainerId,
+            placeholder: 'GTM-XXXXXXX',
+            errors: settings.getErrors('gtmContainerId'),
+        }) }}
+    </div>
+
+    <div id="marketing" class="flex-fields hidden">
+        {{ forms.textField({
+            label: "Meta Pixel ID"|t('takeit-cookie'),
+            instructions: "Leave empty to load nothing. The pixel is only loaded once the visitor accepts the marketing category."|t('takeit-cookie'),
+            id: 'metaPixelId',
+            name: 'metaPixelId',
+            value: settings.metaPixelId,
+            placeholder: '000000000000000',
+            errors: settings.getErrors('metaPixelId'),
+        }) }}
+    </div>
+
+    <div id="scripts" class="hidden">
+        {% if scriptCategoryOptions|length %}
+            {{ forms.editableTableField({
+                label: "Custom scripts"|t('takeit-cookie'),
+                instructions: "Third-party snippets — chat widgets, other pixels. Each one only runs once its category is accepted. Paste the snippet including its `<script>` tags."|t('takeit-cookie'),
+                id: 'scripts',
+                name: 'scripts',
+                cols: {
+                    name: {
+                        heading: "Name"|t('takeit-cookie'),
+                        type: 'singleline',
+                        width: '18%',
+                    },
+                    category: {
+                        heading: "Category"|t('takeit-cookie'),
+                        type: 'select',
+                        options: scriptCategoryOptions,
+                        width: '15%',
+                    },
+                    position: {
+                        heading: "Position"|t('takeit-cookie'),
+                        type: 'select',
+                        options: positionOptions,
+                        width: '15%',
+                    },
+                    code: {
+                        heading: "Code"|t('takeit-cookie'),
+                        type: 'multiline',
+                        code: true,
+                    },
+                    enabled: {
+                        heading: "On"|t('takeit-cookie'),
+                        type: 'lightswitch',
+                        thin: true,
+                    },
+                },
+                rows: settings.scripts,
+                addRowLabel: "Add a script"|t('takeit-cookie'),
+                allowAdd: true,
+                allowReorder: true,
+                allowDelete: true,
+                errors: settings.getErrors('scripts'),
+            }) }}
+        {% else %}
+            <p>{{ "Turn on at least one optional category before adding custom scripts — every script has to be tied to a category the visitor can decline."|t('takeit-cookie') }}</p>
+        {% endif %}
+    </div>
+{% endblock %}

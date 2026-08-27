@@ -1,0 +1,43 @@
+{
+    "name": "takeit/takeit-cookie",
+    "description": "Cookie consent banner for Craft CMS, with consent-gated Google Analytics, Meta Pixel and custom scripts.",
+    "type": "craft-plugin",
+    "license": "proprietary",
+    "keywords": [
+        "craft",
+        "craftcms",
+        "craft-plugin",
+        "cookies",
+        "consent",
+        "gdpr"
+    ],
+    "authors": [
+        {
+            "name": "TakeIT s.r.o.",
+            "homepage": "https://takeitsro.sk"
+        }
+    ],
+    "require": {
+        "php": ">=8.2",
+        "craftcms/cms": "^5.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "takeit\\takeitcookie\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "TakeIT Cookie",
+        "handle": "takeit-cookie",
+        "developer": "TakeIT s.r.o.",
+        "developerUrl": "https://takeitsro.sk",
+        "class": "takeit\\takeitcookie\\Plugin"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "craftcms/plugin-installer": true,
+            "yiisoft/yii2-composer": true
+        }
+    }
+}
