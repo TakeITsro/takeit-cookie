@@ -133,6 +133,7 @@ class SettingsController extends Controller
         $settings->revealDelay = (int)$request->getBodyParam('revealDelay', 0);
         $settings->badgeEnabled = (bool)$request->getBodyParam('badgeEnabled');
         $settings->badgeLabel = (string)$request->getBodyParam('badgeLabel', '');
+        $settings->loadStylesheet = (bool)$request->getBodyParam('loadStylesheet');
 
         $settings->gaMeasurementId = (string)$request->getBodyParam('gaMeasurementId', '');
         $settings->gtmContainerId = (string)$request->getBodyParam('gtmContainerId', '');

@@ -7,7 +7,7 @@ blocked until the visitor accepts the matching category. Nothing third-party is 
 before consent — no script tag, no cookieless ping, no beacon.
 
 - Vanilla JavaScript. No Alpine, no js-cookie, no jQuery.
-- Ships no CSS, and uses class names you can style yourself.
+- Ships its own stylesheet, so it works standalone — switch it off and style it yourself.
 - Settings live in the plugin's own table, so they stay editable on production.
 - Consent is one versioned cookie; raise the version to re-ask everyone.
 
@@ -122,6 +122,7 @@ plugin's own table, not project config, so they can be changed on production wit
 | Reveal delay | Seconds after load before the banner appears. Overrides the CSS delay |
 | Show the re-open badge | The permanent handle for changing an answer |
 | Badge label | Text inside the badge |
+| Load the plugin stylesheet | On by default. Off if your own stylesheet handles the banner |
 
 ### Categories
 
@@ -226,8 +227,12 @@ markup.
 
 ## Styling
 
-The plugin ships no CSS. The markup uses the class names the hand-rolled banner used, so an
-existing stylesheet keeps working:
+The plugin ships a stylesheet and loads it by default, so the banner works on a site with no
+styling of its own. It is self-contained: no build step, no dependency on the host site's
+utility classes.
+
+The markup uses the class names the hand-rolled banner used, so an existing stylesheet keeps
+working too:
 
 `.cookie`, `.cookie.visible`, `.cookie_wrapper`, `.cookie_title`, `.cookie_text`,
 `.cookie_container`, `.cookie_wrapper_item`, `.cookie_wrapper_line`, `.cookie_wrapper_sub`,
@@ -237,6 +242,26 @@ existing stylesheet keeps working:
 
 Visibility is driven by the `visible` class on `.cookie` and `.cookie_badge`. The detail
 panel and the buttons are toggled with inline `display`.
+
+### Living alongside your own stylesheet
+
+The plugin's `<link>` is emitted by `head()`, before your own stylesheets, so your rules win
+on equal specificity. Sites that fully style the banner can switch **Load the plugin
+stylesheet** off on the General tab and drop the request entirely.
+
+### Colours
+
+The stylesheet reads the host site's palette variables when they exist and falls back
+otherwise:
+
+| Variable | Falls back to | Used for |
+| --- | --- | --- |
+| `--main-background-color-white` | `#ffffff` | Panel background |
+| `--main-text-color-dark` | `#1a1a1a` | Text, active toggles, dark buttons, badge |
+| `--main-text-color-light` | `#ffffff` | Button and badge text |
+
+Accent, toggle track and knob colours are set on `.cookie` as `--tc-accent`, `--tc-track`
+and `--tc-knob`, and can be overridden the same way.
 
 ## Translations
 

@@ -1,0 +1,297 @@
+/**
+ * Default styling for the cookie banner.
+ *
+ * Everything is scoped under .cookie / .cookie_badge, and nothing here depends on the
+ * host site's utility classes or custom properties. Where the site does define its own
+ * palette variables they are picked up; otherwise the fallbacks apply.
+ *
+ * This file is loaded first, before the site's own stylesheets, so any rule the site
+ * writes for these classes wins. Sites that style the banner themselves can switch the
+ * stylesheet off entirely in the control panel.
+ */
+
+.cookie,
+.cookie_badge {
+    --tc-surface: var(--main-background-color-white, #ffffff);
+    --tc-ink: var(--main-text-color-dark, #1a1a1a);
+    --tc-ink-inverse: var(--main-text-color-light, #ffffff);
+    --tc-accent: #09a661;
+    --tc-track: #e5e3df;
+    --tc-knob: #f7f0f3;
+    --tc-gap: 1.25em;
+}
+
+.cookie,
+.cookie *,
+.cookie *::before,
+.cookie *::after,
+.cookie_badge {
+    box-sizing: border-box;
+}
+
+/* Shell
+   ========================================================================== */
+
+.cookie {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: calc(100% - 20px);
+    max-width: 850px;
+    max-height: 80vh;
+    background-color: var(--tc-surface);
+    box-shadow: rgba(0, 0, 0, 0.35) 0 5px 15px;
+    opacity: 0;
+    transform: scale(0) translate(-50%, -50%);
+    transition: all 0.3s ease;
+}
+
+.cookie.visible {
+    opacity: 1;
+    transform: scale(1) translate(-50%, -50%);
+}
+
+.cookie > .cookie_wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    max-height: 100%;
+    padding: var(--tc-gap);
+    overflow-y: auto;
+}
+
+/* Type
+   ========================================================================== */
+
+.cookie .cookie_title {
+    color: var(--tc-ink);
+    font-size: 2em;
+    font-weight: 700;
+    line-height: 1.2em;
+    letter-spacing: 0;
+}
+
+.cookie .cookie_text {
+    width: 100%;
+    margin-top: var(--tc-gap);
+    color: var(--tc-ink);
+    font-size: 1.125em;
+    font-weight: 400;
+    line-height: 1.2em;
+    letter-spacing: 0;
+}
+
+.cookie .cookie_text a {
+    color: inherit;
+    font: inherit;
+    text-decoration: underline;
+}
+
+.cookie .cookie_subtitle {
+    color: var(--tc-ink);
+    font-size: 1.5em;
+    font-weight: 700;
+    line-height: 1.2em;
+    letter-spacing: 0;
+}
+
+/* Detail panel
+   ========================================================================== */
+
+.cookie .cookie_container {
+    display: none;
+    width: 100%;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.cookie .cookie_container::-webkit-scrollbar {
+    display: none;
+}
+
+.cookie .cookie_container .cookie_wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    margin-top: var(--tc-gap);
+}
+
+.cookie .cookie_wrapper_item {
+    width: 100%;
+}
+
+.cookie .cookie_wrapper_line {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-top: 2.5em;
+    padding-bottom: var(--tc-gap);
+    border-bottom: 1px solid var(--tc-ink);
+}
+
+.cookie .cookie_wrapper_item:last-child .cookie_wrapper_line {
+    border-bottom: none;
+}
+
+.cookie .cookie_wrapper_line .column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: calc(100% - 5em);
+    margin-right: auto;
+}
+
+.cookie .cookie_wrapper_line .column .cookie_text {
+    margin-top: 0.625em;
+}
+
+/* Toggles
+   ========================================================================== */
+
+.cookie .cookie_checkbox {
+    position: relative;
+    flex: none;
+    width: 2.5em;
+    height: 1.25em;
+    border-radius: 0.625em;
+    background-color: var(--tc-track);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cookie .cookie_checkbox span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1.25em;
+    height: 1.25em;
+    border: 1px solid var(--tc-track);
+    border-radius: 0.625em;
+    background-color: var(--tc-knob);
+    transition: all 0.3s ease;
+}
+
+.cookie .cookie_checkbox.active {
+    background-color: var(--tc-ink);
+}
+
+.cookie .cookie_checkbox.active span {
+    left: 1.25em;
+    border-color: var(--tc-ink);
+}
+
+.cookie .cookie_checkbox.disabled {
+    cursor: default;
+    opacity: 0.6;
+}
+
+/* Sub-categories
+   ========================================================================== */
+
+.cookie .cookie_wrapper_sub {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 2.5em;
+    width: 100%;
+    margin-top: var(--tc-gap);
+}
+
+.cookie .cookie_wrapper_sub_item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.cookie .cookie_wrapper_sub_item .cookie_text {
+    margin-top: 0.625em;
+    text-align: center;
+}
+
+/* Buttons
+   ========================================================================== */
+
+.cookie .cookie_bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 4px;
+    width: 100%;
+    margin-top: var(--tc-gap);
+    padding: 4px;
+}
+
+.cookie .cookie_bottom .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 3.75em;
+    padding: 0.8em 2em;
+    border: none;
+    background-color: var(--tc-ink);
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.cookie .cookie_bottom .btn span {
+    z-index: 5;
+    color: var(--tc-ink-inverse);
+    font-size: 1em;
+    font-weight: 500;
+    line-height: 1.5em;
+    letter-spacing: 0;
+    text-align: center;
+}
+
+.cookie .cookie_bottom .btn.green {
+    background-color: var(--tc-accent);
+}
+
+/* Initial state — the script takes over from here. */
+.cookie .cookie_less,
+.cookie .cookie_save {
+    display: none;
+}
+
+/* Badge
+   ========================================================================== */
+
+.cookie_badge {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    z-index: 500;
+    display: none;
+    padding: 5px 10px;
+    background-color: var(--tc-ink);
+    color: var(--tc-ink-inverse);
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.2em;
+    letter-spacing: 0;
+    cursor: pointer;
+}
+
+.cookie_badge.visible {
+    display: flex;
+}
+
+/* Small screens
+   ========================================================================== */
+
+@media (max-width: 600px) {
+    .cookie .cookie_wrapper_sub {
+        grid-gap: 2.5em 1.25em;
+    }
+
+    .cookie .cookie_bottom {
+        grid-template-columns: 100%;
+    }
+}

@@ -41,6 +41,12 @@ class Settings extends Model
 
     public bool $badgeEnabled = true;
 
+    /**
+     * Whether the plugin's own stylesheet is loaded. Switch it off on sites that style the
+     * banner themselves.
+     */
+    public bool $loadStylesheet = true;
+
     public string $badgeLabel = 'Cookies';
 
     // Categories
@@ -236,6 +242,7 @@ class Settings extends Model
             'consentVersion' => Craft::t('takeit-cookie', 'Consent version'),
             'revealDelay' => Craft::t('takeit-cookie', 'Reveal delay (seconds)'),
             'badgeEnabled' => Craft::t('takeit-cookie', 'Show the re-open badge'),
+            'loadStylesheet' => Craft::t('takeit-cookie', 'Load the plugin stylesheet'),
             'badgeLabel' => Craft::t('takeit-cookie', 'Badge label'),
             'gaMeasurementId' => Craft::t('takeit-cookie', 'GA4 measurement ID'),
             'gtmContainerId' => Craft::t('takeit-cookie', 'GTM container ID'),
@@ -250,7 +257,7 @@ class Settings extends Model
     public function rules(): array
     {
         return [
-            [['enabled', 'badgeEnabled'], 'boolean'],
+            [['enabled', 'badgeEnabled', 'loadStylesheet'], 'boolean'],
             [
                 [
                     'companyName',
@@ -307,6 +314,7 @@ class Settings extends Model
                     'revealDelay',
                     'badgeEnabled',
                     'badgeLabel',
+                    'loadStylesheet',
                     'enabledCategories',
                     'gaMeasurementId',
                     'gtmContainerId',

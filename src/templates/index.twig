@@ -112,6 +112,15 @@
             value: settings.badgeLabel,
             errors: settings.getErrors('badgeLabel'),
         }) }}
+
+        {{ forms.lightswitchField({
+            label: "Load the plugin stylesheet"|t('takeit-cookie'),
+            instructions: "Switch this off if your own stylesheet already styles the banner. The plugin's stylesheet loads before your own, so your rules win either way."|t('takeit-cookie'),
+            id: 'loadStylesheet',
+            name: 'loadStylesheet',
+            on: settings.loadStylesheet,
+            errors: settings.getErrors('loadStylesheet'),
+        }) }}
     </div>
 
     <div id="categories" class="flex-fields hidden">

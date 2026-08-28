@@ -47,6 +47,7 @@ class RenderService extends Component
             'analyticsJson' => $analytics !== null ? $this->encode($analytics) : null,
             'pixelJson' => $pixel !== null ? $this->encode($pixel) : null,
             'headScripts' => $this->scriptsFor($settings, [Settings::POSITION_HEAD]),
+            'stylesheetUrl' => $settings->loadStylesheet ? $this->assetUrl('cookie.css') : null,
         ]);
     }
 
@@ -288,20 +289,26 @@ class RenderService extends Component
         );
     }
 
-    /**
-     * Publishes banner.js and returns its URL, cache-busted on the file's own timestamp.
-     */
     private function scriptUrl(): string
+    {
+        return $this->assetUrl('banner.js') ?? '';
+    }
+
+    /**
+     * Publishes one of the plugin's front-end assets and returns its URL, cache-busted on
+     * the file's own timestamp.
+     */
+    private function assetUrl(string $file): ?string
     {
         $dir = dirname(__DIR__) . '/web/assets/banner';
 
-        $url = Craft::$app->getAssetManager()->getPublishedUrl($dir, true, 'banner.js');
+        $url = Craft::$app->getAssetManager()->getPublishedUrl($dir, true, $file);
 
         if ($url === false) {
-            return '';
+            return null;
         }
 
-        $stamp = @filemtime($dir . '/banner.js') ?: 0;
+        $stamp = @filemtime($dir . '/' . $file) ?: 0;
 
         return $url . (str_contains($url, '?') ? '&' : '?') . 'v=' . $stamp;
     }
