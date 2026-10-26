@@ -135,6 +135,11 @@ class SettingsController extends Controller
         $settings->badgeLabel = (string)$request->getBodyParam('badgeLabel', '');
         $settings->loadStylesheet = (bool)$request->getBodyParam('loadStylesheet');
 
+        $settings->colorBackground = (string)$request->getBodyParam('colorBackground', '');
+        $settings->colorText = (string)$request->getBodyParam('colorText', '');
+        $settings->colorMain = (string)$request->getBodyParam('colorMain', '');
+        $settings->colorDecline = (string)$request->getBodyParam('colorDecline', '');
+
         $settings->gaMeasurementId = (string)$request->getBodyParam('gaMeasurementId', '');
         $settings->gtmContainerId = (string)$request->getBodyParam('gtmContainerId', '');
         $settings->metaPixelId = (string)$request->getBodyParam('metaPixelId', '');

@@ -12,10 +12,16 @@
 
 .cookie,
 .cookie_badge {
-    --tc-surface: var(--main-background-color-white, #ffffff);
-    --tc-ink: var(--main-text-color-dark, #1a1a1a);
-    --tc-ink-inverse: var(--main-text-color-light, #ffffff);
+    /* The banner owns its palette — it deliberately does not inherit the host site's
+       colour variables, so it cannot end up painting buttons in the panel's own colour.
+       Override any of these from the control panel, or from your own stylesheet. */
+    --tc-surface: #ffffff;
+    --tc-ink: #1a1a1a;
+    --tc-on-ink: var(--tc-surface);
     --tc-accent: #09a661;
+    --tc-on-accent: #ffffff;
+    --tc-decline: var(--tc-ink);
+    --tc-on-decline: var(--tc-on-ink);
     --tc-track: #e5e3df;
     --tc-knob: #f7f0f3;
     --tc-gap: 1.25em;
@@ -242,7 +248,7 @@
 
 .cookie .cookie_bottom .btn span {
     z-index: 5;
-    color: var(--tc-ink-inverse);
+    color: var(--tc-on-ink);
     font-size: 1em;
     font-weight: 500;
     line-height: 1.5em;
@@ -250,8 +256,26 @@
     text-align: center;
 }
 
+/* The two affirmative actions carry the main colour. */
+.cookie .cookie_bottom .cookie_save,
+.cookie .cookie_bottom .cookie_accept,
 .cookie .cookie_bottom .btn.green {
     background-color: var(--tc-accent);
+}
+
+.cookie .cookie_bottom .cookie_save span,
+.cookie .cookie_bottom .cookie_accept span,
+.cookie .cookie_bottom .btn.green span {
+    color: var(--tc-on-accent);
+}
+
+/* Neutral by default; give it a colour in the control panel to set it apart. */
+.cookie .cookie_bottom .cookie_deny {
+    background-color: var(--tc-decline);
+}
+
+.cookie .cookie_bottom .cookie_deny span {
+    color: var(--tc-on-decline);
 }
 
 /* Initial state — the script takes over from here. */
@@ -271,7 +295,7 @@
     display: none;
     padding: 5px 10px;
     background-color: var(--tc-ink);
-    color: var(--tc-ink-inverse);
+    color: var(--tc-on-ink);
     font-size: 14px;
     font-weight: 300;
     line-height: 1.2em;

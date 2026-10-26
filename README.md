@@ -123,6 +123,7 @@ plugin's own table, not project config, so they can be changed on production wit
 | Show the re-open badge | The permanent handle for changing an answer |
 | Badge label | Text inside the badge |
 | Load the plugin stylesheet | On by default. Off if your own stylesheet handles the banner |
+| Background / Text / Main / Decline colour | Optional palette overrides. Empty uses the shipped defaults |
 
 ### Categories
 
@@ -251,17 +252,29 @@ stylesheet** off on the General tab and drop the request entirely.
 
 ### Colours
 
-The stylesheet reads the host site's palette variables when they exist and falls back
-otherwise:
+The banner owns its palette. It deliberately does **not** inherit the host site's colour
+variables — doing so meant that on a site whose "text" colour happened to match its panel
+background, the buttons painted themselves invisible.
 
-| Variable | Falls back to | Used for |
+Set any of these on the **General** tab and they are emitted as custom properties scoped to
+`.cookie, .cookie_badge`:
+
+| Setting | Property | Drives |
 | --- | --- | --- |
-| `--main-background-color-white` | `#ffffff` | Panel background |
-| `--main-text-color-dark` | `#1a1a1a` | Text, active toggles, dark buttons, badge |
-| `--main-text-color-light` | `#ffffff` | Button and badge text |
+| Background colour | `--tc-surface` | Panel background, badge text, neutral button labels |
+| Text colour | `--tc-ink` | Body text, headings, active toggles, neutral buttons, badge |
+| Main colour | `--tc-accent` | Accept all and Save |
+| Decline button colour | `--tc-decline` | Decline all. Empty leaves it neutral |
 
-Accent, toggle track and knob colours are set on `.cookie` as `--tc-accent`, `--tc-track`
-and `--tc-knob`, and can be overridden the same way.
+Leave a field empty and the shipped default applies: `#ffffff` surface, `#1a1a1a` ink,
+`#09a661` accent, and a Decline button styled like the other neutral ones.
+
+The buttons split into two roles. Accept all and Save carry the main colour; Detail, Close
+and Decline all use the text colour as their background with the background colour as their
+label, so they always contrast against the panel no matter what palette you pick.
+
+Four more properties are set on `.cookie` for stylesheet-level tweaks and have no control
+panel field: `--tc-on-ink`, `--tc-on-accent`, `--tc-track` and `--tc-knob`.
 
 ## Translations
 

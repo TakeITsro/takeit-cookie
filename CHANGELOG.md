@@ -9,12 +9,20 @@
   dependency on the site's utility classes — and it picks up the site's palette variables
   where they exist.
 - **Load the plugin stylesheet** setting on the General tab, on by default.
+- Background, Text, Main and Decline colour fields on the General tab. Left empty they use
+  the shipped defaults; set, they are emitted as custom properties scoped to the banner.
 - Plugin icon, and a matching monochrome nav icon for the control panel sidebar.
 
 ### Changed
 
 - The stylesheet link is emitted before the site's own stylesheets, so site rules win on
   equal specificity when both are loaded.
+- The banner no longer inherits the host site's colour variables. It ships its own palette,
+  so it cannot paint a button in the panel's own colour on a site whose variables mean
+  something different.
+- Buttons now split by role rather than by the class names in the markup: Accept all and
+  Save carry the main colour, while Detail, Close and Decline all are neutral and always
+  contrast against the panel.
 
 ### Fixed
 

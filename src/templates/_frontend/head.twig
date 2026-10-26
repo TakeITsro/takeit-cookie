@@ -1,4 +1,5 @@
 {% if stylesheetUrl %}<link rel="stylesheet" href="{{ stylesheetUrl }}">{% endif %}
+{% if paletteCss %}<style>{{ paletteCss|raw }}</style>{% endif %}
 <script>
 window.TakeitCookie = (function (cfg) {
     var listeners = [];

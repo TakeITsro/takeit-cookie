@@ -48,6 +48,7 @@ class RenderService extends Component
             'pixelJson' => $pixel !== null ? $this->encode($pixel) : null,
             'headScripts' => $this->scriptsFor($settings, [Settings::POSITION_HEAD]),
             'stylesheetUrl' => $settings->loadStylesheet ? $this->assetUrl('cookie.css') : null,
+            'paletteCss' => $this->paletteCss($settings),
         ]);
     }
 
@@ -178,6 +179,28 @@ class RenderService extends Component
             'containerId' => $containerId,
             'signals' => self::consentSignals(),
         ];
+    }
+
+    /**
+     * The colour overrides as a scoped rule, or null when every colour is left at its
+     * default. Scoped to the banner's own elements so it beats the stylesheet without
+     * needing !important, and still loses to anything the site writes later.
+     */
+    private function paletteCss(Settings $settings): ?string
+    {
+        $variables = $settings->paletteVariables();
+
+        if ($variables === []) {
+            return null;
+        }
+
+        $declarations = [];
+
+        foreach ($variables as $property => $value) {
+            $declarations[] = sprintf('%s:%s', $property, $value);
+        }
+
+        return sprintf('.cookie,.cookie_badge{%s}', implode(';', $declarations));
     }
 
     /**

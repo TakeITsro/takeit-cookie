@@ -47,6 +47,21 @@ class Settings extends Model
      */
     public bool $loadStylesheet = true;
 
+    // Colours
+    // -------------------------------------------------------------------------
+
+    /**
+     * Optional overrides for the stylesheet's palette. Empty means "use the shipped
+     * default". Stored normalised, with a leading #.
+     */
+    public string $colorBackground = '';
+
+    public string $colorText = '';
+
+    public string $colorMain = '';
+
+    public string $colorDecline = '';
+
     public string $badgeLabel = 'Cookies';
 
     // Categories
@@ -243,6 +258,10 @@ class Settings extends Model
             'revealDelay' => Craft::t('takeit-cookie', 'Reveal delay (seconds)'),
             'badgeEnabled' => Craft::t('takeit-cookie', 'Show the re-open badge'),
             'loadStylesheet' => Craft::t('takeit-cookie', 'Load the plugin stylesheet'),
+            'colorBackground' => Craft::t('takeit-cookie', 'Background colour'),
+            'colorText' => Craft::t('takeit-cookie', 'Text colour'),
+            'colorMain' => Craft::t('takeit-cookie', 'Main colour'),
+            'colorDecline' => Craft::t('takeit-cookie', 'Decline button colour'),
             'badgeLabel' => Craft::t('takeit-cookie', 'Badge label'),
             'gaMeasurementId' => Craft::t('takeit-cookie', 'GA4 measurement ID'),
             'gtmContainerId' => Craft::t('takeit-cookie', 'GTM container ID'),
@@ -301,6 +320,14 @@ class Settings extends Model
                 'skipOnEmpty' => true,
                 'message' => Craft::t('takeit-cookie', 'Expected a numeric Meta Pixel ID, or an environment variable such as $META_PIXEL_ID.'),
             ],
+            [['colorBackground', 'colorText', 'colorMain', 'colorDecline'], 'normalizeColor'],
+            [
+                ['colorBackground', 'colorText', 'colorMain', 'colorDecline'],
+                'match',
+                'pattern' => '/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i',
+                'skipOnEmpty' => true,
+                'message' => Craft::t('takeit-cookie', 'Enter a hex colour such as 09a661.'),
+            ],
             [['enabledCategories'], 'validateEnabledCategories'],
             [['scripts'], 'validateScripts'],
             [
@@ -315,6 +342,10 @@ class Settings extends Model
                     'badgeEnabled',
                     'badgeLabel',
                     'loadStylesheet',
+                    'colorBackground',
+                    'colorText',
+                    'colorMain',
+                    'colorDecline',
                     'enabledCategories',
                     'gaMeasurementId',
                     'gtmContainerId',
@@ -324,6 +355,53 @@ class Settings extends Model
                 'safe',
             ],
         ];
+    }
+
+    /**
+     * Craft's colour input posts the hex without its leading #, so put it back.
+     */
+    public function normalizeColor(string $attribute): void
+    {
+        $value = trim((string)$this->$attribute);
+
+        if ($value === '') {
+            $this->$attribute = '';
+            return;
+        }
+
+        $this->$attribute = '#' . ltrim($value, '#');
+    }
+
+    /**
+     * The custom properties that differ from the stylesheet's defaults.
+     *
+     * A decline colour also brightens that button's label, since the default label colour
+     * is meant for the neutral treatment.
+     *
+     * @return array<string, string>
+     */
+    public function paletteVariables(): array
+    {
+        $variables = [];
+
+        if ($this->colorBackground !== '') {
+            $variables['--tc-surface'] = $this->colorBackground;
+        }
+
+        if ($this->colorText !== '') {
+            $variables['--tc-ink'] = $this->colorText;
+        }
+
+        if ($this->colorMain !== '') {
+            $variables['--tc-accent'] = $this->colorMain;
+        }
+
+        if ($this->colorDecline !== '') {
+            $variables['--tc-decline'] = $this->colorDecline;
+            $variables['--tc-on-decline'] = '#ffffff';
+        }
+
+        return $variables;
     }
 
     public function validateEnabledCategories(string $attribute): void

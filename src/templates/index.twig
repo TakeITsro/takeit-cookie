@@ -121,6 +121,52 @@
             on: settings.loadStylesheet,
             errors: settings.getErrors('loadStylesheet'),
         }) }}
+
+        <hr>
+
+        <h2>{{ "Colours"|t('takeit-cookie') }}</h2>
+
+        <div class="field">
+            <div class="instructions">
+                <p>{{ "Leave a colour empty to use the one the plugin ships. These only apply while the plugin stylesheet is loaded."|t('takeit-cookie') }}</p>
+            </div>
+        </div>
+
+        {{ forms.colorField({
+            label: "Background colour"|t('takeit-cookie'),
+            instructions: "The banner panel and the badge."|t('takeit-cookie'),
+            id: 'colorBackground',
+            name: 'colorBackground',
+            value: settings.colorBackground,
+            errors: settings.getErrors('colorBackground'),
+        }) }}
+
+        {{ forms.colorField({
+            label: "Text colour"|t('takeit-cookie'),
+            instructions: "Body text, headings, and the neutral buttons — Detail, Close and Decline."|t('takeit-cookie'),
+            id: 'colorText',
+            name: 'colorText',
+            value: settings.colorText,
+            errors: settings.getErrors('colorText'),
+        }) }}
+
+        {{ forms.colorField({
+            label: "Main colour"|t('takeit-cookie'),
+            instructions: "The Accept all and Save buttons."|t('takeit-cookie'),
+            id: 'colorMain',
+            name: 'colorMain',
+            value: settings.colorMain,
+            errors: settings.getErrors('colorMain'),
+        }) }}
+
+        {{ forms.colorField({
+            label: "Decline button colour"|t('takeit-cookie'),
+            instructions: "Optional. Left empty, Decline all is styled like the other neutral buttons."|t('takeit-cookie'),
+            id: 'colorDecline',
+            name: 'colorDecline',
+            value: settings.colorDecline,
+            errors: settings.getErrors('colorDecline'),
+        }) }}
     </div>
 
     <div id="categories" class="flex-fields hidden">
