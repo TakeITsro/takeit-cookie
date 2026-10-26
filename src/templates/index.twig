@@ -167,6 +167,24 @@
             value: settings.colorDecline,
             errors: settings.getErrors('colorDecline'),
         }) }}
+
+        {{ forms.colorField({
+            label: "Badge background colour"|t('takeit-cookie'),
+            instructions: "Optional. Left empty, the badge uses the text colour."|t('takeit-cookie'),
+            id: 'colorBadgeBackground',
+            name: 'colorBadgeBackground',
+            value: settings.colorBadgeBackground,
+            errors: settings.getErrors('colorBadgeBackground'),
+        }) }}
+
+        {{ forms.colorField({
+            label: "Badge text colour"|t('takeit-cookie'),
+            instructions: "Optional. Left empty, the badge label uses the background colour."|t('takeit-cookie'),
+            id: 'colorBadgeText',
+            name: 'colorBadgeText',
+            value: settings.colorBadgeText,
+            errors: settings.getErrors('colorBadgeText'),
+        }) }}
     </div>
 
     <div id="categories" class="flex-fields hidden">

@@ -1,13 +1,19 @@
 # Changelog
 
-## 1.1.0 - 2026-08-27
+## 1.1.2 - 2026-10-26
+
+### Added
+
+- Separate Badge background and Badge text colour fields, so the re-open badge can be
+  coloured independently of the banner. Left empty it renders exactly as before.
+
+## 1.1.1 - 2026-10-26
 
 ### Added
 
 - The plugin now ships its own stylesheet and loads it by default, so the banner is styled
-  without the host site providing anything. It is self-contained — no build step, and no
-  dependency on the site's utility classes — and it picks up the site's palette variables
-  where they exist.
+  without the host site providing anything. It is self-contained — no build step, no
+  dependency on the site's utility classes, and its own palette.
 - **Load the plugin stylesheet** setting on the General tab, on by default.
 - Background, Text, Main and Decline colour fields on the General tab. Left empty they use
   the shipped defaults; set, they are emitted as custom properties scoped to the banner.

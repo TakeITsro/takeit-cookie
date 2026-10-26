@@ -123,7 +123,7 @@ plugin's own table, not project config, so they can be changed on production wit
 | Show the re-open badge | The permanent handle for changing an answer |
 | Badge label | Text inside the badge |
 | Load the plugin stylesheet | On by default. Off if your own stylesheet handles the banner |
-| Background / Text / Main / Decline colour | Optional palette overrides. Empty uses the shipped defaults |
+| Colour fields | Background, Text, Main, Decline, and the two badge colours. Empty uses the shipped defaults |
 
 ### Categories
 
@@ -265,6 +265,8 @@ Set any of these on the **General** tab and they are emitted as custom propertie
 | Text colour | `--tc-ink` | Body text, headings, active toggles, neutral buttons, badge |
 | Main colour | `--tc-accent` | Accept all and Save |
 | Decline button colour | `--tc-decline` | Decline all. Empty leaves it neutral |
+| Badge background colour | `--tc-badge` | The re-open badge. Empty follows the text colour |
+| Badge text colour | `--tc-on-badge` | The badge label. Empty follows the background colour |
 
 Leave a field empty and the shipped default applies: `#ffffff` surface, `#1a1a1a` ink,
 `#09a661` accent, and a Decline button styled like the other neutral ones.
@@ -275,6 +277,9 @@ label, so they always contrast against the panel no matter what palette you pick
 
 Four more properties are set on `.cookie` for stylesheet-level tweaks and have no control
 panel field: `--tc-on-ink`, `--tc-on-accent`, `--tc-track` and `--tc-knob`.
+
+The badge sits outside the banner panel, so it gets its own pair rather than sharing the
+button colours — left empty it matches the neutral buttons exactly as before.
 
 ## Translations
 

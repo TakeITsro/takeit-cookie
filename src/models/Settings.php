@@ -62,6 +62,10 @@ class Settings extends Model
 
     public string $colorDecline = '';
 
+    public string $colorBadgeBackground = '';
+
+    public string $colorBadgeText = '';
+
     public string $badgeLabel = 'Cookies';
 
     // Categories
@@ -262,6 +266,8 @@ class Settings extends Model
             'colorText' => Craft::t('takeit-cookie', 'Text colour'),
             'colorMain' => Craft::t('takeit-cookie', 'Main colour'),
             'colorDecline' => Craft::t('takeit-cookie', 'Decline button colour'),
+            'colorBadgeBackground' => Craft::t('takeit-cookie', 'Badge background colour'),
+            'colorBadgeText' => Craft::t('takeit-cookie', 'Badge text colour'),
             'badgeLabel' => Craft::t('takeit-cookie', 'Badge label'),
             'gaMeasurementId' => Craft::t('takeit-cookie', 'GA4 measurement ID'),
             'gtmContainerId' => Craft::t('takeit-cookie', 'GTM container ID'),
@@ -320,9 +326,9 @@ class Settings extends Model
                 'skipOnEmpty' => true,
                 'message' => Craft::t('takeit-cookie', 'Expected a numeric Meta Pixel ID, or an environment variable such as $META_PIXEL_ID.'),
             ],
-            [['colorBackground', 'colorText', 'colorMain', 'colorDecline'], 'normalizeColor'],
+            [['colorBackground', 'colorText', 'colorMain', 'colorDecline', 'colorBadgeBackground', 'colorBadgeText'], 'normalizeColor'],
             [
-                ['colorBackground', 'colorText', 'colorMain', 'colorDecline'],
+                ['colorBackground', 'colorText', 'colorMain', 'colorDecline', 'colorBadgeBackground', 'colorBadgeText'],
                 'match',
                 'pattern' => '/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i',
                 'skipOnEmpty' => true,
@@ -346,6 +352,8 @@ class Settings extends Model
                     'colorText',
                     'colorMain',
                     'colorDecline',
+                    'colorBadgeBackground',
+                    'colorBadgeText',
                     'enabledCategories',
                     'gaMeasurementId',
                     'gtmContainerId',
@@ -399,6 +407,14 @@ class Settings extends Model
         if ($this->colorDecline !== '') {
             $variables['--tc-decline'] = $this->colorDecline;
             $variables['--tc-on-decline'] = '#ffffff';
+        }
+
+        if ($this->colorBadgeBackground !== '') {
+            $variables['--tc-badge'] = $this->colorBadgeBackground;
+        }
+
+        if ($this->colorBadgeText !== '') {
+            $variables['--tc-on-badge'] = $this->colorBadgeText;
         }
 
         return $variables;
