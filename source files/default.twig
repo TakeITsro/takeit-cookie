@@ -1,0 +1,38 @@
+{#{% set baseUrl = siteUrl %}#}
+{#{% set siteUrl = "" %}#}
+
+<!DOCTYPE html>
+<html lang="sk-SK">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta charset="utf-8" />
+    {% hook 'seo' %}
+    <meta name="author" content="TakeIT">
+    <meta name="robots" content="index, follow"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=6.0, user-scalable=yes, viewport-fit=cover"/>
+
+    {% include 'components/body/ga_default.twig' %}
+
+    {% include "components/meta/favicon" %}
+
+    {% include "components/meta/fonts" %}
+
+    {% include "components/meta/style" %}
+
+    {% include "components/meta/scripts" %}
+
+    {% include 'components/body/ga_code.twig' %}
+</head>
+
+<body>
+
+{% include "blocks/header" %}
+
+{% include "blocks/menu" %}
+
+{% block content %} {% endblock %}
+
+{% include "blocks/footer" %}
+
+{% include "blocks/cookie" %}
+</body>

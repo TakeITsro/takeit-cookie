@@ -1,0 +1,300 @@
+<script>
+    function initCookies() {
+        return {
+            cart: {
+                summary_count: 0,
+                summary_total: '0.00'
+            },
+            customer: {
+                logged_in: false
+            },
+            getData(data) {
+                if (data.cart) {
+                    this.cart = data.cart
+                }
+                if (data.customer) {
+                    this.customer = data.customer
+                }
+            },
+            cookies_content: {
+                companyName: "",
+                cookies: [
+                    {
+                        name: "functional",
+                        title: "{{ 'Funkcionális sütik'|t }}",
+                        text: "{{ 'Ezekre a sütikre a weboldal megfelelő működéséhez van szükség.'|t }}",
+                        value: "1",
+                        required: true,
+                    },
+                    {
+                        name: "analytics",
+                        title: "{{ 'Analitikai sütik'|t }}",
+                        text: "{{ 'Szolgáltatásaink fejlesztése érdekében a Google Analytics szolgáltatást használjuk, amely névtelen információkat küld a látogatásáról, és összesített adatokat gyűjt a látogatók szokásairól, amelyeknek köszönhetően nap mint nap fejlesztjük szolgáltatásainkat.'|t }}",
+                        value: "0",
+                        required: false,
+                    },
+                ],
+            },
+            storage: window.localStorage || window.sessionStorage,
+            consentUsedKey: 'consent-used',
+            // FIX: non-essential cookies default to denied/0 — opt-in required by GDPR
+            cookieValues: {
+                "functional": "1",
+                "analytics": "0",
+                "ad_storage": "denied",
+                "ad_user_data": "denied",
+                "ad_personalization": "denied",
+                "analytics_storage": "denied",
+            },
+            checkCookie(element) {
+                if (!element.classList.contains("disabled")) {
+                    if (element.classList.contains("active")) {
+                        element.classList.remove("active");
+
+                        if (element.dataset.cookie == "analytics") {
+                            const subItems = document.querySelectorAll(".cookie_wrapper_sub_item .cookie_checkbox");
+                            subItems.forEach((item) => item.classList.remove("active"));
+                        }
+                    } else {
+                        element.classList.add("active");
+
+                        if (element.dataset.cookie == "analytics") {
+                            const subItems = document.querySelectorAll(".cookie_wrapper_sub_item .cookie_checkbox");
+                            subItems.forEach((item) => item.classList.add("active"));
+                        }
+                    }
+                }
+            },
+            moreCookie() {
+                const cookieContainer = document.querySelector(".cookie_container");
+                const cookieMore = document.querySelector(".cookie_more");
+                const cookieLess = document.querySelector(".cookie_less");
+                const cookieSave = document.querySelector(".cookie_save");
+                const cookieAccept = document.querySelector(".cookie_accept");
+
+                cookieContainer.style.display = "block";
+                cookieMore.style.display = "none";
+                cookieAccept.style.display = "none";
+                cookieLess.style.display = "flex";
+                // FIX: deny button stays visible in detail view — hiding it is a dark pattern
+                cookieSave.style.display = "flex";
+            },
+            lessCookie() {
+                const cookieContainer = document.querySelector(".cookie_container");
+                const cookieMore = document.querySelector(".cookie_more");
+                const cookieLess = document.querySelector(".cookie_less");
+                const cookieSave = document.querySelector(".cookie_save");
+                const cookieAccept = document.querySelector(".cookie_accept");
+
+                cookieContainer.style.display = "none";
+                cookieMore.style.display = "flex";
+                cookieLess.style.display = "none";
+                cookieAccept.style.display = "flex";
+                // FIX: deny button stays visible always
+                cookieSave.style.display = "none";
+            },
+            acceptCookie() {
+                const cookie = document.querySelector(".cookie");
+                const cookieBadge = document.querySelector(".cookie_badge");
+
+                cookie.classList.remove("visible");
+                cookieBadge.classList.add("visible");
+
+                this.cookieValues = {
+                    "functional": "1",
+                    "analytics": "1",
+                    "ad_storage": "granted",
+                    "ad_user_data": "granted",
+                    "ad_personalization": "granted",
+                    "analytics_storage": "granted",
+                }
+
+                {% if ga.googleID is not empty %}
+                gtag('consent', 'update', {
+                    'ad_storage': 'granted',
+                    'ad_user_data': 'granted',
+                    'ad_personalization': 'granted',
+                    'analytics_storage': 'granted'
+                });
+                {% endif %}
+
+                // FIX: added expires: 365 so consent persists for 1 year
+                Cookies.set('cookies', JSON.stringify(this.cookieValues), { expires: 365 });
+
+                this.storage.setItem(this.consentUsedKey, '1');
+            },
+            denyCookie() {
+                const cookie = document.querySelector(".cookie");
+                const cookieBadge = document.querySelector(".cookie_badge");
+
+                cookie.classList.remove("visible");
+                cookieBadge.classList.add("visible");
+
+                this.cookieValues = {
+                    "functional": "1",
+                    "analytics": "0",
+                    "ad_storage": "denied",
+                    "ad_user_data": "denied",
+                    "ad_personalization": "denied",
+                    "analytics_storage": "denied",
+                }
+
+                {% if ga.googleID is not empty %}
+                gtag('consent', 'update', {
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'analytics_storage': 'denied'
+                });
+                {% endif %}
+
+                // FIX: added expires: 365
+                Cookies.set('cookies', JSON.stringify(this.cookieValues), { expires: 365 });
+
+                this.storage.setItem(this.consentUsedKey, '1');
+            },
+            saveCookie() {
+                const cookie = document.querySelector(".cookie");
+                const cookieBadge = document.querySelector(".cookie_badge");
+
+                cookie.classList.remove("visible");
+                cookieBadge.classList.add("visible");
+
+                this.cookieValues = {
+                    "functional": '1',
+                    "analytics": (document.querySelector("#analytics").classList.contains("active")) ? '1' :'0',
+                    "ad_storage": (document.querySelector("#ad_storage").classList.contains("active")) ? 'granted' : 'denied',
+                    "ad_user_data": (document.querySelector("#ad_user_data").classList.contains("active")) ? 'granted' : 'denied',
+                    "ad_personalization": (document.querySelector("#ad_personalization").classList.contains("active")) ? 'granted' : 'denied',
+                    "analytics_storage": (document.querySelector("#analytics_storage").classList.contains("active")) ? 'granted' : 'denied',
+                }
+
+                {% if ga.googleID is not empty %}
+                gtag('consent', 'update',  {
+                    'ad_storage': (document.querySelector("#ad_storage").classList.contains("active")) ? 'granted' : 'denied',
+                    'ad_user_data': (document.querySelector("#ad_user_data").classList.contains("active")) ? 'granted' : 'denied',
+                    'ad_personalization': (document.querySelector("#ad_personalization").classList.contains("active")) ? 'granted' : 'denied',
+                    'analytics_storage': (document.querySelector("#analytics_storage").classList.contains("active")) ? 'granted' : 'denied',
+                });
+                {% endif %}
+
+                // FIX: added expires: 365
+                Cookies.set('cookies', JSON.stringify(this.cookieValues), { expires: 365 });
+
+                this.storage.setItem(this.consentUsedKey, '1');
+            },
+            showCookie() {
+                const accepted_cookies = JSON.parse(Cookies.get('cookies') || '{}');
+                const cookieItems = document.querySelectorAll(".cookie_checkbox");
+                cookieItems.forEach((item) => {
+                    if (accepted_cookies[item.dataset.cookie] == "0" || accepted_cookies[item.dataset.cookie] == "denied") {
+                        item.classList.remove("active");
+                    }
+                });
+
+                if (!this.storage.getItem(this.consentUsedKey)) {
+                    const cookie = document.querySelector(".cookie");
+                    cookie.classList.add("visible");
+                } else {
+                    const cookieBadge = document.querySelector(".cookie_badge");
+                    cookieBadge.classList.add("visible");
+                }
+            }
+        }
+    }
+
+    function openCookie() {
+        const cookie = document.querySelector(".cookie");
+        const cookieBadge = document.querySelector(".cookie_badge");
+
+        cookie.style.transitionDelay = "0";
+        cookie.classList.add("visible");
+        cookieBadge.classList.remove("visible");
+    }
+</script>
+
+<div class="cookie flex_column align_start" x-data="initCookies()">
+    <div class="cookie_wrapper flex_column align_start">
+        <div class="cookie_title">{{ "do Pilates"|t }}</div>
+        <p class="cookie_text">{{ "Sütiket használunk a weboldalon kínált szolgáltatások különböző funkcióinak biztosításához, a hozzáférésük elemzéséhez, valamint az eredmények felhasználásához azok optimalizálása érdekében. Emellett sütiket használunk a célzott hirdetések megjelenítéséhez is. Ebből a célból az adatokat továbbítjuk kapcsolt vállalkozásainknak és partnereinknek is. Ha csak a feltétlenül szükséges sütikhez szeretne hozzájárulni, itt elutasíthatja a további sütiket."|t }} <a href="/cookie-policy">{{ "Süti szabályzat"|t }}</a></p>
+        <div class="cookie_container">
+            <div class="cookie_wrapper flex_column align_start">
+
+                <template x-for="cookie in cookies_content.cookies" :key="cookie.name">
+                    <div class="cookie_wrapper_item">
+                        <div class="cookie_wrapper_line flex align_center">
+                            <div class="column flex_column align_start">
+                                <span class="cookie_subtitle" x-text="cookie.title"></span>
+                                <p class="cookie_text" x-text="cookie.text"></p>
+                            </div>
+                            {# FIX: non-required cookies start inactive (no 'active' class by default) #}
+                            <div class="cookie_checkbox"
+                                 :class="{'disabled': cookie.required, 'active': cookie.required}"
+                                 :id="cookie.name"
+                                 :data-cookie="cookie.name"
+                                 @click="checkCookie($el)">
+                                <span></span>
+                            </div>
+                        </div>
+
+                        <template x-if="cookie.name === 'analytics'">
+                            <div class="cookie_wrapper_sub flex align_center">
+                                <div class="cookie_wrapper_sub_item flex_column align_center">
+                                    {# FIX: sub-items start inactive #}
+                                    <div class="cookie_checkbox"
+                                         id="ad_storage"
+                                         data-cookie="ad_storage"
+                                         @click="checkCookie($el)">
+                                        <span></span>
+                                    </div>
+                                    <p class="cookie_text">{{ "Hozzájárulás a Google Hirdetésekhez szükséges sütik tárolásához"|t }}</p>
+                                </div>
+
+                                <div class="cookie_wrapper_sub_item flex_column align_center">
+                                    <div class="cookie_checkbox"
+                                         id="ad_user_data"
+                                         data-cookie="ad_user_data"
+                                         @click="checkCookie($el)">
+                                        <span></span>
+                                    </div>
+                                    <p class="cookie_text">{{ "Hozzájárulás az adatok Google Ads céljából történő továbbításához"|t }}</p>
+                                </div>
+
+                                <div class="cookie_wrapper_sub_item flex_column align_center">
+                                    <div class="cookie_checkbox"
+                                         id="ad_personalization"
+                                         data-cookie="ad_personalization"
+                                         @click="checkCookie($el)">
+                                        <span></span>
+                                    </div>
+                                    <p class="cookie_text">{{ "Hozzájárulás a személyre szabott hirdetésekhez"|t }}</p>
+                                </div>
+
+                                <div class="cookie_wrapper_sub_item flex_column align_center">
+                                    <div class="cookie_checkbox"
+                                         id="analytics_storage"
+                                         data-cookie="analytics_storage"
+                                         @click="checkCookie($el)">
+                                        <span></span>
+                                    </div>
+                                    <p class="cookie_text">{{ "Hozzájárulás a Google Analytics sütik tárolásához"|t }}</p>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+            </div>
+        </div>
+    </div>
+    <div class="cookie_bottom flex align_center space_between" x-init="showCookie()">
+        <div class="btn white square cookie_more" @click="moreCookie()"><span>{{ "Részletek"|t }}</span></div>
+        <div class="btn white square cookie_less" @click="lessCookie()"><span>{{ "Bezárás"|t }}</span></div>
+        {# FIX: deny button is always visible — never hidden in detail view #}
+        <div class="btn white square cookie_deny" @click="denyCookie()"><span>{{ "Összes elutasítása"|t }}</span></div>
+        <div class="btn white square green cookie_save" @click="saveCookie()"><span>{{ "Mentés"|t }}</span></div>
+        <div class="btn red square green cookie_accept" data-text="{{ "Összes elfogadása"|t }}" @click="acceptCookie()"><span>{{ "Összes elfogadása"|t }}</span></div>
+    </div>
+</div>
+
+<div class="cookie_badge" onclick="openCookie()">Cookies</div>

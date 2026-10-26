@@ -253,4 +253,43 @@
             <p>{{ "Turn on at least one optional category before adding custom scripts — every script has to be tied to a category the visitor can decline."|t('takeit-cookie') }}</p>
         {% endif %}
     </div>
+
+    {% js %}
+        /**
+         * Craft's editable tables refuse to initialise while they are not visible
+         * (Craft.EditableTable.isVisible() measures the parent's height), and after the
+         * first attempt they only retry on a window resize. Switching tabs emits no
+         * resize, so a table sitting in a background tab never binds its "add row"
+         * button. Initialise it the moment its tab is actually shown.
+         */
+        (function () {
+            var pane = document.getElementById('scripts');
+
+            if (!pane) {
+                return;
+            }
+
+            function wake() {
+                if (!pane.offsetParent && !pane.offsetHeight) {
+                    return;
+                }
+
+                pane.querySelectorAll('table.editable').forEach(function (table) {
+                    var instance = $(table).data('editable-table');
+
+                    if (instance && !instance.initialized) {
+                        instance.initialize();
+                    }
+                });
+            }
+
+            new MutationObserver(wake).observe(pane, {
+                attributes: true,
+                attributeFilter: ['class', 'style', 'hidden'],
+            });
+
+            // In case the pane is already open, or something else revealed it.
+            wake();
+        })();
+    {% endjs %}
 {% endblock %}
