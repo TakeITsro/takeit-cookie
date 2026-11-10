@@ -47,7 +47,7 @@ class RenderService extends Component
             'analyticsJson' => $analytics !== null ? $this->encode($analytics) : null,
             'pixelJson' => $pixel !== null ? $this->encode($pixel) : null,
             'headScripts' => $this->scriptsFor($settings, [Settings::POSITION_HEAD]),
-            'stylesheetUrl' => $settings->loadStylesheet ? $this->assetUrl('cookie.css') : null,
+            'stylesheetCss' => $settings->loadStylesheet ? $this->stylesheetCss() : null,
             'paletteCss' => $this->paletteCss($settings),
         ]);
     }
@@ -309,6 +309,45 @@ class RenderService extends Component
         return Json::encode(
             $value,
             JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE
+        );
+    }
+
+    /**
+     * The stylesheet's contents, ready to inline.
+     *
+     * It is served inline rather than as a <link> because an external stylesheet in the
+     * <head> blocks first paint, and the banner's CSS is never needed for it — the banner
+     * is hidden until the reveal delay elapses. Inlining also rules out the unstyled flash
+     * that loading it asynchronously would cause.
+     *
+     * @return string|null Null when the file cannot be read.
+     */
+    private function stylesheetCss(): ?string
+    {
+        $file = dirname(__DIR__) . '/web/assets/banner/cookie.css';
+        $stamp = @filemtime($file);
+
+        if ($stamp === false) {
+            return null;
+        }
+
+        return Craft::$app->getCache()->getOrSet(
+            sprintf('takeit-cookie:css:%d', $stamp),
+            function() use ($file): ?string {
+                $css = @file_get_contents($file);
+
+                if ($css === false) {
+                    return null;
+                }
+
+                // Drop comments and per-line indentation. Deliberately not a full
+                // minifier: nothing here touches the inside of a declaration, so there is
+                // no way to mangle a value.
+                $css = preg_replace('~/\*.*?\*/~s', '', $css);
+                $lines = array_filter(array_map('trim', explode("\n", $css)), fn($line) => $line !== '');
+
+                return implode("\n", $lines);
+            }
         );
     }
 

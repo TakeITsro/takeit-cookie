@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.1.3 - 2026-11-10
+
+### Fixed
+
+- `fbq()` is now defined from page load, as Meta's queue stub, instead of only existing
+  after marketing was granted. Site code calling `fbq('track', 'Purchase', …)` on a
+  thank-you page threw a `ReferenceError` before the visitor answered the banner, and an
+  `if (window.fbq)` guard silently dropped the event for anyone who accepted afterwards.
+  Calls now queue and replay on grant, matching how `gtag()` already behaved. `fbevents.js`
+  is still not requested until marketing is granted, so the hard block is unchanged.
+
+### Changed
+
+- The stylesheet is now inlined by `head()` instead of linked. An external stylesheet in
+  the `<head>` blocks first paint and is flagged by Lighthouse, while the banner's CSS is
+  not needed for the first paint at all. Comments and indentation are stripped and the
+  result cached, about 1.2 KB gzipped per response.
+
 ## 1.1.2 - 2026-10-26
 
 ### Added

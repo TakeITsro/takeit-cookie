@@ -159,8 +159,15 @@ analytics answer — not Google's own defaults, which are *granted*.
 ### Marketing — Meta Pixel
 
 Gated behind **marketing**, which is off by default. `fbevents.js` is not requested until
-marketing is granted; on grant the pixel bootstraps, calls `fbq('consent', 'grant')`, inits
-and tracks a `PageView`.
+marketing is granted.
+
+`fbq()` itself exists from page load, as Meta's own queue stub with `fbq('init', …)` and
+`fbq('consent', 'grant')` already queued — ahead of anything your templates push, so the
+replay can never process a tracked event before the consent call. Neither line sends or
+fetches anything while the stub is all there is, so your templates can call `fbq('track',
+…)` without guarding. Calls made before the visitor answers sit in the queue; on grant
+`fbevents.js` is fetched once, the queue replays in order, and a `PageView` follows. If
+marketing is declined the script is never requested and the queue dies with the page.
 
 There is no `<noscript>` fallback pixel. An image beacon cannot be consent-gated, so it is
 left out on purpose.
@@ -212,6 +219,39 @@ Consent is one cookie: `{"v":1,"ts":1756000000,"c":{"functional":1,"analytics":0
 `SameSite=Lax` and `Secure` over https. A cookie whose `v` is below the current consent
 version counts as no answer at all.
 
+### Ecommerce events
+
+The plugin loads the tags and manages consent; it emits no ecommerce events of its own. GA4
+`view_item` / `add_to_cart` / `begin_checkout` / `purchase` and Meta `AddToCart` /
+`InitiateCheckout` / `Purchase` belong in your own templates.
+
+Both `gtag()` and `fbq()` are safe to call at any point in the page, consent or not — each
+is a queue that only drains if its category is granted, so no `if (window.…)` guard and no
+`onChange` dance is needed:
+
+```twig
+{% if order %}
+    <script>
+        gtag('event', 'purchase', {
+            transaction_id: '{{ order.reference }}',
+            value: {{ order.totalPrice }},
+            currency: '{{ order.currency }}'
+        });
+
+        fbq('track', 'Purchase', {
+            value: {{ order.totalPrice }},
+            currency: '{{ order.currency }}'
+        });
+    </script>
+{% endif %}
+```
+
+Checkout and payment-provider scripts are strictly necessary — put them in your templates
+as normal, never in the Scripts tab, which only offers categories a visitor can decline.
+
+Because this is a hard block, a visitor who never answers produces no purchase event at
+all, not even a modelled one. Expect GA4 revenue to under-report against actual orders.
+
 ## Caching
 
 The plugin never varies its HTML by consent — the same markup is served to every visitor and
@@ -246,9 +286,16 @@ panel and the buttons are toggled with inline `display`.
 
 ### Living alongside your own stylesheet
 
-The plugin's `<link>` is emitted by `head()`, before your own stylesheets, so your rules win
-on equal specificity. Sites that fully style the banner can switch **Load the plugin
-stylesheet** off on the General tab and drop the request entirely.
+The stylesheet is inlined by `head()`, before your own stylesheets, so your rules win on
+equal specificity. Sites that fully style the banner can switch **Load the plugin
+stylesheet** off on the General tab and drop it entirely.
+
+It is inlined rather than linked on purpose. An external stylesheet in the `<head>` blocks
+first paint, and Lighthouse flags it — but the banner's CSS is never needed for the first
+paint, since the banner stays hidden until the reveal delay elapses. Loading it
+asynchronously instead would let the unstyled banner flash on screen before the CSS landed,
+so inlining is the one option with neither problem. Comments and indentation are stripped
+and the result is cached, which comes to roughly 1.2 KB gzipped per response.
 
 ### Colours
 
