@@ -4,6 +4,10 @@
 
 ### Fixed
 
+- The banner no longer waits out the reveal delay before hiding. `open()` writes the delay
+  as an inline style and `close()` never cleared it, so with the default 5 second delay the
+  banner stayed on screen for 5 seconds after Accept, with the re-open badge already showing
+  underneath it. On revoke the reload also fired before the banner had started to move.
 - `fbq()` is now defined from page load, as Meta's queue stub, instead of only existing
   after marketing was granted. Site code calling `fbq('track', 'Purchase', …)` on a
   thank-you page threw a `ReferenceError` before the visitor answered the banner, and an

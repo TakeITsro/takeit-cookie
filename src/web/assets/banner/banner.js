@@ -128,6 +128,9 @@
     }
 
     function close() {
+        // open() writes the reveal delay inline; left in place it would stagger the
+        // hide by the same number of seconds.
+        root.style.transitionDelay = '0s';
         root.classList.remove('visible');
 
         if (badge && api.config.badge) {
